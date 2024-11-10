@@ -24,28 +24,34 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "channels", # 항상 처음에 위치시킨다. channels에서 runserver명령을 대체시키기에 다른 앱(ex: whitenois)에 비해 우선순위를 가지기 위함이다.
+    "daphne", # channels 4.0부터 django 기본의 runserver 명령을 daphne앱에서 재정의하여 동작된다.
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "channels",
-]
+    ]
 
 # asgi
-ASGI_APPLICATION = "mysite.asgi.application"
+ASGI_APPLICATION = "mysite.asgi.application" # 추가 : asgi.py 부모 폴더명으로 "프로젝트" 변경
 
 #channels
 from channels.routing import ProtocolTypeRouter
 from django.core.asgi import get_asgi_application
 
+# settings.py 경로에 맞춰 DJANGO_SETTINGS_MODULE 환경변수의 디폴트 값을 지정
 os.environ.setdefault('DJANGO_SETTINGS_MODULE','mysite.settings')
 
 django_asgi_app = get_asgi_application()
 
+#프로토콜 타입별로 서로 다른 ASGI application을 통해 처리토록 라우팅합니다.
 application = ProtocolTypeRouter({
+    # 지금은 http 타입에 대한 라우팅만 명시
     "http" : django_asgi_app,
+    # 서비스 규모에 따라 http와 websoket을 분리하여(웹서버와 채팅서버) 운영하기도 함
+    # "websoket": ..., 
 })
 
 MIDDLEWARE = [
