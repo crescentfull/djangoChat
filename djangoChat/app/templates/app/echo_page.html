@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+
+<script>
+    //ws protocol in http page
+    // wss prototcol in https page
+    const ws = new WebSocket("ws://localhost:8000/ws/echo/");
+    // 배포환경에 따른 protocol/host 변경 대응
+    // const protocol = location.protocol === "http:" ? "ws:" : "wss:";
+    // const ws_url = protocol + "//" + location.host + "ws/echo/";
+    // const ws = new WebSocket(ws_url);
+
+    ws.onopen = () => {
+        console.log("웹소켓 서버 접촉")
+    }
+    ws.onmessage = (event) => {
+        const message = event.data;
+        consol.log("메세지 수신 :", message);
+    }
+    ws.onerror = () => {
+        if(event.wasclean){
+            console.log("웹소켓 에러 발생")
+        }
+    }
+    ws.onclose = (event) => {
+        if(event.wasclean){
+            console.log("ws.close()에 의한 연결 끊김")
+        }
+        else {
+            // 서버 프로세스 kill or network error
+            console.log("웹소켓 서버와 연결 장애")
+        }
+    }
+    
+</script>    
+</body>
+</html>
