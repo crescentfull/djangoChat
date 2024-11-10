@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-
+<p>WebSocket test</p>
 
 <script>
     //ws protocol in http page
@@ -21,8 +21,9 @@
         console.log("웹소켓 서버 접촉")
     }
     ws.onmessage = (event) => {
-        const message = event.data;
-        consol.log("메세지 수신 :", message);
+        const json_string = event.data;
+        const obj = JSON.parse(json_string);
+        consol.log("메세지 수신 :", obj);
     }
     ws.onerror = () => {
         if(event.wasclean){
