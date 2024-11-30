@@ -1,7 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from djangoChat.app.models import Post
+from app.models import Post
 
 def echo_page(request):
     return render(request, "app/echo_page.html")
