@@ -1,3 +1,4 @@
+
 {% extends "app/base.html" %}
 
 {% block content %}
@@ -11,3 +12,33 @@
         </div>
     </div>
 {% endblock %}
+
+{% block  %}
+<script>
+const handlers = {
+    ws: null,
+    connect(ws_url) {
+        this.ws = new WebSocket(ws_url);
+
+
+
+        this.ws.onopen = this.onopen.bind(this);
+        this.ws.onclose = this.onclsoe.bind(this);
+        this.ws.onerror = this.ws.onerror.bind(this);
+        this.ws.onmessage = this.onmessage.bind(this);
+    },
+    onopen(){
+        console.log("웹소켓 서버와 접속");
+    },
+    onclose(event){
+        if(!event.wasClean){
+            console.error("웹소켓 서버 장애")
+        }
+    },
+    onerror(){},
+    onmessage(event){},
+}
+
+</script>
+
+{% endblock  %}
