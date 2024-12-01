@@ -1,5 +1,7 @@
 from django.db import models
 from django.urls import reverse
+from django.db.models.signals import post_save, post_delete
+
 from app.mixins import ChannelLayerGroupSendMixin
 
 class Post(ChannelLayerGroupSendMixin, models.Model):
