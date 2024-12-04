@@ -1,18 +1,17 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import JsonWebsocketConsumer
 
-class EchoConsumer(WebsocketConsumer):
+class EchoConsumer(JsonWebsocketConsumer):
     
-    def receive(self, text_data=None, bytes_data=None):
-        obj = json.loads(text_data)
-        print("수신 :", obj)
-        json_string = json.dumps({
-            "content" : obj["content"],
-            "user" : obj["user"],
-        })
-        self.send(json_string)
+    def receive_json(self, content, **kwargs):
+        print("수신 :", content)
 
-class LiveblogConsumer(WebsocketConsumer):
+        self.send_json({
+            "content": content["content"],
+            "user": content["user"],
+        })
+
+class LiveblogConsumer(JsonWebsocketConsumer):
     groups = ["liveblog"]
     
     # 그룹을 통해 받은 메세지 -> 웹소켓 클라 전달 (self.send(전달_메세지))
@@ -22,10 +21,10 @@ class LiveblogConsumer(WebsocketConsumer):
     
     # 하나의 consumer에서 여러이벤트를 처리하다보며느 이벤트 type중복이 발생 가능. prefix 권장
     def liveblog_post_created(self, event_dict):
-        self.send(json.dumps(event_dict))
+        self.send_json(event_dict)
     
     def liveblog_post_updated(self, event_dict):
-        self.send(json.dumps(event_dict))
+        self.send_json(event_dict)
         
     def liveblog_post_deleted(self, event_dict):
-        self.send(json.dumps(event_dict))
+        self.send_json(event_dict)
