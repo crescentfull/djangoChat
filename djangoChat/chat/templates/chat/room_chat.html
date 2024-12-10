@@ -24,4 +24,61 @@
         </div>
     </div>
 </div>
+
 {% endblock  %}
+
+{% block extra-script %}
+<script>
+const handlers = {
+    chat_messages_tag: null,
+    //초기화
+    init(){
+        this.chat_messages_tag = document.querySelector("#chat_messages");
+        document.querySelector("#message_form").addEventListner("submit", this.onsubmit.bind(this));
+    },
+    // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
+    append_message(message) {
+        const element = document.createElement("div");
+        element.className = "chat-message";
+        
+        // CSS 스타일링을 위해 div로 한 번 더 감싸기
+        const wrapper = document.createElement("div");
+        wrapper.textContent = message;
+        element.appendChild(wrapper);
+
+        this.chat_messages_tag.appendChild(element);
+        this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
+    },
+    // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
+    onsubmit(event){
+        event.preventDefault();
+
+        const form_data = new FormData(event.target);
+        const props = Object.fromEntries(form_data)
+        event.target.reset();
+
+        const { message } = props;
+        console.log("웹소켓으로 전송할 메세지", message);
+        this.append_message(message);
+    }
+};
+
+handlers.init();
+</script>
+{% endblock  %}
+
+{% block extra-style %}
+<style>
+    .chat-message > div {
+        background-color: #3b3b3b;
+        color: #e1e1e1;
+        border-radius: 0.8em;
+        padding: 0.4em;
+        margin: 0.4em 0;
+        display: inline-block;
+        white-space: pre-wrap;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+</style>
+{% endblock %}
