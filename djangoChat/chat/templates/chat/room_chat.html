@@ -34,7 +34,7 @@ const handlers = {
     //초기화
     init(){
         this.chat_messages_tag = document.querySelector("#chat_messages");
-        document.querySelector("#message_form").addEventListner("submit", this.onsubmit.bind(this));
+        document.querySelector("#message_form").addEventListener("submit", this.onsubmit.bind(this));
     },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
     append_message(message) {
