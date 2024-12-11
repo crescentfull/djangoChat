@@ -12,6 +12,7 @@ import os
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 import app.routing
+import chat.routing
 
 # settings.py 경로에 맞춰 DJANGO_SETTINGS_MODULE 환경변수의 디폴트 값을 지정
 os.environ.setdefault('DJANGO_SETTINGS_MODULE','mysite.settings')
@@ -24,6 +25,7 @@ application = ProtocolTypeRouter({
     "http" : django_asgi_app,
     # 서비스 규모에 따라 http와 websoket을 분리하여(웹서버와 채팅서버) 운영하기도 함
     "websocket": URLRouter(
+        chat.routing.websocket_urlpatters + 
         app.routing.websocket_urlpatterns
     )
 })
