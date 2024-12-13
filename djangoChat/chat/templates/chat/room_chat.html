@@ -116,6 +116,11 @@ const handlers = {
 };
 
 handlers.init();
+
+const protocol = location.protocol === "http:" ? "ws:" : "wss:";
+const ws_url = protocol + "/" + location.host + "/ws" + location.pathname;
+handlers.connect(ws_url);
+
 </script>
 {% endblock  %}
 
