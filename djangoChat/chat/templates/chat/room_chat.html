@@ -31,11 +31,48 @@
 <script>
 const handlers = {
     chat_messages_tag: null,
+    ws: null,
+    retry: 0,
+
     //초기화
     init(){
         this.chat_messages_tag = document.querySelector("#chat_messages");
         document.querySelector("#message_form").addEventListener("submit", this.onsubmit.bind(this));
     },
+    //
+    connect(ws_url) {
+        if(this.ws) { this.ws.close(); } // 웹소켓 재연결시 명시적으로 연결을 닫음
+
+        // 지정 주소로 웹소켓 연결을 시도합니다.
+        this.ws = new WebSocket(ws_url || this.ws?.url);
+
+        // 각 WebSocket 이벤트리스너의 this가 WebSocket 임으로 변경해준다
+        this.ws.onopen = this.onopen.bind(this);
+        this.ws.onclose = this.onclose.bind(this);
+        this.ws.onerror = this.onerror.bind(this);
+        this.ws.onmessage = this.onmessage.bind(this);
+    }
+    //
+    reconnect() { this.connect(); },
+    // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
+    onsubmit(event){
+        event.preventDefault();
+
+        const form_data = new FormData(event.target);
+        const props = Object.fromEntries(form_data)
+        event.target.reset();
+
+        const { message } = props;
+        console.log("웹소켓으로 전송할 메세지", message);
+    
+        this.append_message(message); //메세지창에 추가
+
+        // 유저가 입력한 채팅 메세지를 채널스로 전달
+        this.ws.send(JSON.stringfy({
+            type: "chat.message",
+            message: message,
+        }))
+    }
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
     append_message(message) {
         const element = document.createElement("div");
@@ -49,18 +86,33 @@ const handlers = {
         this.chat_messages_tag.appendChild(element);
         this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
     },
-    // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
-    onsubmit(event){
-        event.preventDefault();
 
-        const form_data = new FormData(event.target);
-        const props = Object.fromEntries(form_data)
-        event.target.reset();
+    //
+    onopen(){
+        console.log("웹소켓 서버와 접속");
+    },
+    onclose(event){
+        if(!event.wasClean){
+            console.error("웹소켓 서버 장애")
+        }
+    },
+    onerror(){
+        console.error("웹소켓 에러가 발생")
+    },
+    onmessage(event){
+        const message_json = event.data;
+        console.log("웹소켓 테스트 메세지 수신: ", message_json)
 
-        const { message } = props;
-        console.log("웹소켓으로 전송할 메세지", message);
-        this.append_message(message);
-    }
+        const { type, post_id, post_partial_url } = JSON.parse(message_json);
+
+        switch(type) {
+            case "chat.message":
+                this.append_message(message);
+                break;
+            default:
+                console.error('Invalid message type : $(type)');
+        }
+    },
 };
 
 handlers.init();
