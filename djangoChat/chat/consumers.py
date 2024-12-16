@@ -9,7 +9,7 @@ class ChatConsumer(JsonWebsocketConsumer):
     
     def _init_(self):
         super().__init__()
-        # 인스턴스 변수는 생성자 내에서 정의
+        # 파이썬 클래스에서 인스턴스 변수는 생성자 내에서 정의
         self.group_name = "" # 인스턴스 변수 group_name 추가
         
     def connect(self):
@@ -30,6 +30,12 @@ class ChatConsumer(JsonWebsocketConsumer):
         # connect 메서드 기본 구현에서는 self.accept() 호출부만 존재
         self.accept()
     
+    def disconnect(self, code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.group_name,
+            self.channel_name,
+        )
+    
     #단일 클라이언트로부터 메세지를 받으면 호출
     def receive_json(self, content, **kwargs):
         _type = content["type"]
@@ -38,6 +44,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             message = content["message"]
             # publish 과정: "square" 그룹 내 다른 Consumer를에게 메세지를 전달
             async_to_sync(self.channel_layer.group_send)(
+                        self.group_name,
                         {
                         "type": "chat.message",
                         "message": message,
