@@ -3,8 +3,32 @@ from channels.generic.websocket import JsonWebsocketConsumer
 
 class ChatConsumer(JsonWebsocketConsumer):
     # room_name에 상관없이 모든 유저들을 광장(sqaure)을 통해 채팅
-    SQUARE_GROUP_NAME = "square"
-    groups = [SQUARE_GROUP_NAME]
+    #SQUARE_GROUP_NAME = "square"
+    #groups = [SQUARE_GROUP_NAME] 
+    # 고정 그룹명 x , room_name에 기반하여 그룹명 생성
+    
+    def _init_(self):
+        super().__init__()
+        # 인스턴스 변수는 생성자 내에서 정의
+        self.group_name = "" # 인스턴스 변수 group_name 추가
+        
+    def connect(self):
+        # chat/routing.py 내 websocket_urlpatterns에 따라
+        # /ws/chat/test/chat/ 요청의 경우 self.scope["url_route"] 값은?
+        # => {'args':(), 'kwargs':{'room_name':'test'}}
+        room_name = self.scope["url_route"]["kwargs"]["room_name"]
+        
+        # room_name에 기반하여 그룹명 생성
+        self.group_name = f"chat-{room_name}"
+        
+        async_to_sync(self.channel_layer.group_add)(
+            self.group_name,
+            self.channel_name
+        )
+        
+        # 본 웹소켓 접속을 허용
+        # connect 메서드 기본 구현에서는 self.accept() 호출부만 존재
+        self.accept()
     
     #단일 클라이언트로부터 메세지를 받으면 호출
     def receive_json(self, content, **kwargs):
