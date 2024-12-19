@@ -41,7 +41,7 @@ const handlers = {
     },
     //
     connect(ws_url) {
-        if(this.ws) { this.ws.close(); } // 웹소켓 재연결시 명시적으로 연결을 닫음
+        if(this.ws) this.ws.close(); // 웹소켓 재연결시 명시적으로 연결을 닫음
 
         // 지정 주소로 웹소켓 연결을 시도합니다.
         this.ws = new WebSocket(ws_url || this.ws?.url);
@@ -53,24 +53,44 @@ const handlers = {
         this.ws.onmessage = this.onmessage.bind(this);
     },
     reconnect() { this.connect(); },
-    // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
-    onsubmit(event){
-        event.preventDefault();
+    //
+    onopen(){
+        console.log("웹소켓 서버와 접속");
+        this.retry = 0;
+    },
+    onclose(event){
+        if(!event.wasClean){
+            console.error("웹서버 장애 혹은 네트워크 장애");
+            
+            if(this.retry < 3){
+                setTimeout(() => {
+                    this.retry += 1;
+                    this.reconnect();
+                    console.log('[${this.retry}] 접속 재시도 ...');
+                }, 1000 * this.retry);
+            } else {
+                alert("웹소켓 서버 접속 오류, 대기실로 이동");
+                window.location.href = "{% url 'chat:index' %}";
+            }
+        }
+    },
+    onerror(){
+        console.error("웹소켓 에러가 발생");
+    },
+    onmessage(event){
+        const message_json = event.data;
+        console.log("웹소켓 테스트 메세지 수신: ", message_json);
 
-        const form_data = new FormData(event.target);
-        const props = Object.fromEntries(form_data);
-        event.target.reset();
+        const { type, message } = JSON.parse(message_json);
 
-        const { message } = props;
-        console.log("웹소켓으로 전송할 메세지", message);
-    
-        this.append_message(message); //메세지창에 추가
-
-        // 유저가 입력한 채팅 메세지를 채널스로 전달
-        this.ws.send(JSON.stringify({
-            type: "chat.message",
-            message: message,
-        }));
+        switch(type) {
+            case "chat.message":
+                this.append_message(message);
+                console.log(message);
+                break;
+            default:
+                console.error('Invalid message type : ${type}');
+        }
     },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
     append_message(message) {
@@ -84,52 +104,33 @@ const handlers = {
 
         this.chat_messages_tag.appendChild(element);
         this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
-    },
+        },
+    // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
+    onsubmit(event){
+        event.preventDefault();
 
-    //
-    onopen(){
-        console.log("웹소켓 서버와 접속");
-    },
-    onclose(event){
-        if(!event.wasClean){
-            console.error("웹서버 장애 혹은 네트워크 장애");
-            
-            if(this.retry < 3){
-                setTimeout(() => {
-                    this.retry += 1;
-                    this.reconnect();
-                    console.log('[${this.retry}] 접속 재시도 ...');
-                }, 1000 * this.retry);
-            } else {
-                alert("웹소켓 서버 접속 오류, 홈으로 이동");
-                window.location.href = "/";
-            }
-        }
-    },
-    onerror(){
-        console.error("웹소켓 에러가 발생");
-    },
-    onmessage(event){
-        const message_json = event.data;
-        console.log("웹소켓 테스트 메세지 수신: ", message_json);
+        const form_data = new FormData(event.target);
+        const props = Object.fromEntries(form_data);
+        event.target.reset();
 
-        const { type, message, post_id, post_partial_url } = JSON.parse(message_json);
+        const { message } = props;
+        console.log("웹소켓으로 전송할 메세지", message);
+    
+        //this.append_message(message); //메세지창에 추가
 
-        switch(type) {
-            case "chat.message":
-                this.append_message(message);
-                console.log(message);
-                break;
-            default:
-                console.error('Invalid message type : $(type)');
-        }
+        // 유저가 입력한 채팅 메세지를 채널스로 전달
+        this.ws.send(JSON.stringify({
+            type: "chat.message",
+            message: message,
+        }));
     },
 };
 
 handlers.init();
 
 const protocol = location.protocol === "http:" ? "ws:" : "wss:";
-const ws_url = protocol + "/" + location.host + "/ws" + location.pathname;
+{% comment %} const room_name = "{{ room_name }}"; {% endcomment %}
+const ws_url = protocol + "//" + location.host + "/ws" + location.pathname;
 handlers.connect(ws_url);
 
 </script>
