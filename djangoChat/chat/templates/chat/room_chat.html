@@ -51,15 +51,14 @@ const handlers = {
         this.ws.onclose = this.onclose.bind(this);
         this.ws.onerror = this.onerror.bind(this);
         this.ws.onmessage = this.onmessage.bind(this);
-    }
-    //
+    },
     reconnect() { this.connect(); },
     // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
     onsubmit(event){
         event.preventDefault();
 
         const form_data = new FormData(event.target);
-        const props = Object.fromEntries(form_data)
+        const props = Object.fromEntries(form_data);
         event.target.reset();
 
         const { message } = props;
@@ -68,11 +67,11 @@ const handlers = {
         this.append_message(message); //메세지창에 추가
 
         // 유저가 입력한 채팅 메세지를 채널스로 전달
-        this.ws.send(JSON.stringfy({
+        this.ws.send(JSON.stringify({
             type: "chat.message",
             message: message,
-        }))
-    }
+        }));
+    },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
     append_message(message) {
         const element = document.createElement("div");
@@ -93,21 +92,33 @@ const handlers = {
     },
     onclose(event){
         if(!event.wasClean){
-            console.error("웹소켓 서버 장애")
+            console.error("웹서버 장애 혹은 네트워크 장애");
+            
+            if(this.retry < 3){
+                setTimeout(() => {
+                    this.retry += 1;
+                    this.reconnect();
+                    console.log('[${this.retry}] 접속 재시도 ...');
+                }, 1000 * this.retry);
+            } else {
+                alert("웹소켓 서버 접속 오류, 홈으로 이동");
+                window.location.href = "/";
+            }
         }
     },
     onerror(){
-        console.error("웹소켓 에러가 발생")
+        console.error("웹소켓 에러가 발생");
     },
     onmessage(event){
         const message_json = event.data;
-        console.log("웹소켓 테스트 메세지 수신: ", message_json)
+        console.log("웹소켓 테스트 메세지 수신: ", message_json);
 
-        const { type, post_id, post_partial_url } = JSON.parse(message_json);
+        const { type, message, post_id, post_partial_url } = JSON.parse(message_json);
 
         switch(type) {
             case "chat.message":
                 this.append_message(message);
+                console.log(message);
                 break;
             default:
                 console.error('Invalid message type : $(type)');
