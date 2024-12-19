@@ -30,11 +30,12 @@ class ChatConsumer(JsonWebsocketConsumer):
         # connect 메서드 기본 구현에서는 self.accept() 호출부만 존재
         self.accept()
     
+    # 웹 소켓 클라이언트와 접속이 끊어졌을 때, 호출됨
     def disconnect(self, code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.group_name,
-            self.channel_name,
-        )
+        if self.group_name:
+            async_to_sync(self.channel_layer.group_discard)(
+                self.group_name, self.channel_name
+            )
     
     #단일 클라이언트로부터 메세지를 받으면 호출
     def receive_json(self, content, **kwargs):

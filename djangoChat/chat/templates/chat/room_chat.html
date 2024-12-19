@@ -20,7 +20,7 @@
 
             <hr class="my-3" />
 
-            <a href="{% url 'chat:index'%}" class="btn btn-primary"> 대기실로 이동 </a>
+            <a href="{% url 'chat:index' %}" class="btn btn-primary"> 대기실로 이동 </a>
         </div>
     </div>
 </div>
@@ -129,7 +129,6 @@ const handlers = {
 handlers.init();
 
 const protocol = location.protocol === "http:" ? "ws:" : "wss:";
-{% comment %} const room_name = "{{ room_name }}"; {% endcomment %}
 const ws_url = protocol + "//" + location.host + "/ws" + location.pathname;
 handlers.connect(ws_url);
 
