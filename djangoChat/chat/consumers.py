@@ -16,10 +16,12 @@ class ChatConsumer(JsonWebsocketConsumer):
         # chat/routing.py 내 websocket_urlpatterns에 따라
         # /ws/chat/test/chat/ 요청의 경우 self.scope["url_route"] 값은?
         # => {'args':(), 'kwargs':{'room_name':'test'}}
-        room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        
+        # =>
+        # /ws/chat/123/chat/ 요청의 경우
+        # => {'args': (), 'kwargs': {'room_pk': 123}}
+        room_pk = self.scope["url_route"]["kwargs"]["room_pk"]
         # room_name에 기반하여 그룹명 생성
-        self.group_name = f"chat-{room_name}"
+        self.group_name = f"chat-{room_pk}"
         
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,

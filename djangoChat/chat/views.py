@@ -1,5 +1,5 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 
 from chat.forms import RoomForm
 from chat.models import Room
@@ -21,7 +21,8 @@ def room_new(request):
         "form": form,
     }) 
         
-def room_chat(request: HttpRequest, room_name: str) -> HttpResponse:
+def room_chat(request: HttpRequest, room_pk: str) -> HttpResponse:
+    room = get_object_or_404(Room, pk=room_pk)
     return render(request, "chat/room_chat.html", {
-        "room_name": room_name,
+        "room": room,
     })
