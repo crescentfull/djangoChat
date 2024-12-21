@@ -3,10 +3,11 @@
 {% block content %}
     <h1>채팅방 목록</h1>
     <ul>
+        {% for room in romm_list %}
         <li>
-            {# TODO: 채팅방 목록 조회 -> 렌더링 #}
-            <a href="{% url 'chat:room_chat' 'test' %}">테스트 방 진입</a>
+            <a href="{% url 'chat:room_chat' room.pk %}"> {{ room.name }} </a>
         </li>
+        {% endfor %}
     </ul>
     
     <a href="{% url 'chat:room_new' %}"> 새 채팅방 만들기 </a>

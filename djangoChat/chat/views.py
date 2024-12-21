@@ -5,7 +5,13 @@ from chat.forms import RoomForm
 from chat.models import Room
 
 def index(request: HttpRequest) -> HttpResponse:
-    return render(request, "chat/index.html")
+    #.order_by("-pk")를 지정하지 않으면,
+    # room 모델의 디폴트 정렬 옵션이 지정된다.
+    room_qs = Room.objects.all()
+    
+    return render(request, "chat/index.html"), {
+        "room_list" : room_qs,
+    }
 
 def room_new(request):
     if request.method == "POST":
