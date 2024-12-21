@@ -1,5 +1,6 @@
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
+from chat.models import Room
 
 class ChatConsumer(JsonWebsocketConsumer):
     # room_name에 상관없이 모든 유저들을 광장(sqaure)을 통해 채팅
@@ -21,7 +22,9 @@ class ChatConsumer(JsonWebsocketConsumer):
         # => {'args': (), 'kwargs': {'room_pk': 123}}
         room_pk = self.scope["url_route"]["kwargs"]["room_pk"]
         # room_name에 기반하여 그룹명 생성
-        self.group_name = f"chat-{room_pk}"
+        # self.group_name = f"chat-{room_pk}" =>
+        self.group_name = Room.make_chat_group_name(room_pk=room_pk)
+        
         
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
