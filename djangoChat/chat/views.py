@@ -9,9 +9,9 @@ def index(request: HttpRequest) -> HttpResponse:
     # room 모델의 디폴트 정렬 옵션이 지정된다.
     room_qs = Room.objects.all()
     
-    return render(request, "chat/index.html"), {
+    return render(request, "chat/index.html", {
         "room_list" : room_qs,
-    }
+    })
 
 def room_new(request):
     if request.method == "POST":
