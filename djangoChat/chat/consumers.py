@@ -14,27 +14,25 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.group_name = "" # 인스턴스 변수 group_name 추가
         
     def connect(self):
-        # chat/routing.py 내 websocket_urlpatterns에 따라
-        # /ws/chat/test/chat/ 요청의 경우 self.scope["url_route"] 값은?
-        # => {'args':(), 'kwargs':{'room_name':'test'}}
-        # =>
-        # /ws/chat/123/chat/ 요청의 경우
-        # => {'args': (), 'kwargs': {'room_pk': 123}}
-        room_pk = self.scope["url_route"]["kwargs"]["room_pk"]
-        # room_name에 기반하여 그룹명 생성
-        # self.group_name = f"chat-{room_pk}" =>
-        self.group_name = Room.make_chat_group_name(room_pk=room_pk)
+        # asgi.py에서 AuthMiddlewareStack을 적용하지 않았다면 KeyError 발생
+        # AnonymousUser 인스턴스 혹은 User 인스턴스
+        user = self.scope["user"]
         
-        
-        async_to_sync(self.channel_layer.group_add)(
-            self.group_name,
-            self.channel_name
-        )
-        
-        # 본 웹소켓 접속을 허용
-        # connect 메서드 기본 구현에서는 self.accept() 호출부만 존재
-        self.accept()
-    
+        if not user.is_authenticated:
+            #인증되지 않은 웹소켓 접속 거부
+            #room_chat 뷰에서 인증상태에서만 렌더링됨, 인증되지 않은 웹소켓 요청은 있을 수 없다.
+            #connect에서의 self.close() 호출은 종료코드 1006(비정상 종료)으로 강제전달,
+            #다른 메서드에서의 self.close() 호출은 디폴트로 종료코드 1000(정상 종료)으로 전달됨
+            #웹프론트엔드 웹소켓 onclose 핸들러에서 event.code 속성으로 종료코드 참조
+            self.close()
+        else:
+            room_pk = self.scope["url_route"]["kwargs"]["room_pk"]
+            self.group_name = Room.make_chat_group_name(room_pk=room_pk)   
+            
+            async_to_sync(self.channel_layer.group_add)(
+                self.group_name, self.channel_name
+            )
+            self.accept()
     # 웹 소켓 클라이언트와 접속이 끊어졌을 때, 호출됨
     def disconnect(self, code):
         if self.group_name:
