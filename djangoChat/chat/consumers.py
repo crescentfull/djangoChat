@@ -33,6 +33,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 self.group_name, self.channel_name
             )
             self.accept()
+            
     # 웹 소켓 클라이언트와 접속이 끊어졌을 때, 호출됨
     def disconnect(self, code):
         if self.group_name:
