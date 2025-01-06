@@ -1,6 +1,8 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404, resolve_url
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
 
 from chat.forms import RoomForm
 from chat.models import Room
@@ -35,3 +37,16 @@ def room_chat(request: HttpRequest, room_pk: str) -> HttpResponse:
     return render(request, "chat/room_chat.html", {
         "room": room,
     })
+
+# room_new 뷰의 클래스 기반 뷰(Class Based View) 구현
+# 좌측 room_new FBV(함수 기반 뷰)와 거의 동일한 동작
+
+class RoomCreateView(LoginRequiredMixin, CreateView):
+    form_class = RoomForm
+    template_name = "chat/room_form.html"
+    
+    def get_success_url(self):
+        created_room = self.object
+        return resolve_url("chat:room_chat", created_room.pk)
+    
+room_new = RoomCreateView.as_view()
