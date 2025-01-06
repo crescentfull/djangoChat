@@ -5,9 +5,6 @@ from django.views.generic import TemplateView
 
 # 프로필 뷰 호출은 로그인 시에만 의미가 있다.
 
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = "accounts/profile.html"
-
 login = LoginView.as_view(
     template_name = "partials/form.html",
     extra_context = {
@@ -19,3 +16,8 @@ login = LoginView.as_view(
 logout = LogoutView.as_view(
     next_page="accounts:login",
 )
+
+class ProfileView(LoginRequiredMixin, TemplateView):
+    template_name = "accounts/profile.html"
+    
+profile = ProfileView.as_view()
