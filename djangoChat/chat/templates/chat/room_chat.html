@@ -81,12 +81,16 @@ const handlers = {
         const message_json = event.data;
         console.log("웹소켓 테스트 메세지 수신: ", message_json);
 
-        const { type, message } = JSON.parse(message_json);
+        const message_obj = JSON.parse(message_json);
+        const { type } = message_obj;
 
+        // 메세지 타입에 따라 분기
         switch(type) {
             case "chat.message":
-                this.append_message(message);
-                console.log(message);
+                {
+                    const { message, sender } = message_obj;
+                    this.append_message(message, sender);
+                }
                 break;
             default:
                 console.error('Invalid message type : ${type}');
@@ -96,10 +100,20 @@ const handlers = {
     append_message(message) {
         const element = document.createElement("div");
         element.className = "chat-message";
+
+        // 자신의 메세지일 경우, 클래스명 me 추가
+        let footer = "";
+        if (sender === "{{ user.username }}") {
+            element.className += " me";
+        }
+        else if (sender){
+            footer = ' from ${sender}';
+        }
         
         // CSS 스타일링을 위해 div로 한 번 더 감싸기
         const wrapper = document.createElement("div");
-        wrapper.textContent = message;
+        // 주의: innerHTML은 유저의 HTML이 그대로 상대방에게 전다로디어 수행되기에 보안 위험!
+        wrapper.textContent = message + footer;
         element.appendChild(wrapper);
 
         this.chat_messages_tag.appendChild(element);
