@@ -21,12 +21,13 @@ def room_new(request):
     if request.method == "POST":
         form = RoomForm(request.POST)
         if form.is_valid():
-            created_room: Room = form.save()
+            created_room: Room = form.save(commit=False)
+            created_room.owner =  request.user
+            created_room.save()
             # room pk 기반으로 채팅방 URL을 만든다.
             return redirect("chat:room_chat", created_room.pk)
     else:
         form = RoomForm()
-    
     return render(request, "chat/room_form.html", {
         "form": form,
     }) 
