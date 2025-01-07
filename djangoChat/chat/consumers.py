@@ -43,16 +43,20 @@ class ChatConsumer(JsonWebsocketConsumer):
     
     #단일 클라이언트로부터 메세지를 받으면 호출
     def receive_json(self, content, **kwargs):
+        user = self.scope["user"]
+        
         _type = content["type"]
         
         if _type == "chat.message":
             message = content["message"]
+            sender = user.username
             # publish 과정: "square" 그룹 내 다른 Consumer를에게 메세지를 전달
             async_to_sync(self.channel_layer.group_send)(
                         self.group_name,
                         {
                         "type": "chat.message",
                         "message": message,
+                        "sender": sender,
                     },
                 )
         else:
@@ -66,4 +70,5 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.send_json({
             "type": "chat.message",
             "message": message_dict["message"],
+            "sender": message_dict["sender"]
         })
