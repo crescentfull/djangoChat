@@ -1,7 +1,9 @@
+
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404, resolve_url
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 from django.views.generic import CreateView
 
 from chat.forms import RoomForm
@@ -39,6 +41,25 @@ def room_chat(request: HttpRequest, room_pk: str) -> HttpResponse:
         "room": room,
     })
 
+@login_required
+def room_delete(request: HttpRequest, room_pk: int) -> HttpResponse:
+    room = get_object_or_404(Room, pk=room_pk)
+    
+    #권한체크, 백엔드 단에서 권한체크는 필수.
+    if room.owner != request.user:
+        messages.error(request, "채팅방 소유자가 아닙니다.")
+        return redirect("chat:index")
+    
+    if request.method == "POST":
+        room.delete() # HARD DELETE :  데이터베이스에서 삭제
+        messages.success(request, "채팅방을 삭제했습니다.")
+        return redirect("chat:index")
+    
+    return render(request, "chat/room_confirm_delete.html", {
+        "room": room,
+    })
+    
+    
 # room_new 뷰의 클래스 기반 뷰(Class Based View) 구현
 # 좌측 room_new FBV(함수 기반 뷰)와 거의 동일한 동작
 
