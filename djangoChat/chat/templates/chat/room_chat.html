@@ -31,6 +31,25 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">알림</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> {% endcomment %}
+          <button type="button" class="btn btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 {% endblock  %}
 
 {% block extra-script %}
@@ -77,8 +96,8 @@ const handlers = {
             } else {
                 alert("웹소켓 서버 접속 오류, 대기실로 이동");
                 window.location.href = "{% url 'chat:index' %}";
-            }
-        }
+                }
+             }
     },
     onerror(){
         console.error("웹소켓 에러가 발생");
@@ -124,7 +143,7 @@ const handlers = {
 
         this.chat_messages_tag.appendChild(element);
         this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
-        },
+    },
     // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
     onsubmit(event){
         event.preventDefault();
@@ -144,6 +163,25 @@ const handlers = {
             message: message,
         }));
     },
+    
+    //modal
+    modal(message, ok_handler){
+        const modal_ele = document.querySelector("#staticBackdrop");
+        const body_ele = modal_ele.querySelector(".modal-body");
+        const button_ele = modal_ele.querySelector(".modal-footer button");
+
+        body_ele.textContent = message;
+
+        button_ele.addEventListener("click", () => {
+            if(ok_handler) ok_handler();
+            modal.hide();
+        });
+
+        const modal = new bootstrap.Modal(modal_ele);
+        modal.show();
+    },
+
+    //예시
 };
 
 handlers.init();
