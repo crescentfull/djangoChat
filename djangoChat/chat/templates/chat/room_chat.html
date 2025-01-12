@@ -117,6 +117,11 @@ const handlers = {
                     this.append_message(message, sender);
                 }
                 break;
+            case "chat.room.deleted":
+                this.modal("채팅방이 삭제되었습니다. 대기실로 이동합니다.", () => {
+                    window.location.href = "{% url 'chat:index' %}";
+                });
+                break;
             default:
                 console.error('Invalid message type : ${type}');
         }
