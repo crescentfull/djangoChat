@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_delete
 from djangoChat.mysite import settings
 from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class Room(models.Model):
     # 채팅방 생성 유저를 저장할 수 있도록 외래키를 추가
@@ -45,3 +46,4 @@ post_delete.connect(
     sender=Room,
     dispatch_uid="room__on_post_delete"
 )
+
