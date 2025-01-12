@@ -1,6 +1,7 @@
 from django.db import models
-
+from django.db.models.signals import post_delete
 from djangoChat.mysite import settings
+from channels.layers import get_channel_layer
 
 class Room(models.Model):
     # 채팅방 생성 유저를 저장할 수 있도록 외래키를 추가
@@ -25,3 +26,22 @@ class Room(models.Model):
     class Meta:
     #쿼리셋 디폴트 정렬옵션 지정을 추천
         ordering = ["-pk"]
+        
+def room__on_post_delete(instance, **kwargs):
+    # Consuemr Instance 밖에서 채팅방 그룹에 속한
+    # 모든 Consumer Instances 들에게
+    # chat.room.deleted 메세지를 보낸다.
+    
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        instance.chat_group_name,
+        {
+            "type": "chat.room.deleted",
+        }
+    )
+    
+post_delete.connect(
+    room__on_post_delete,
+    sender=Room,
+    dispatch_uid="room__on_post_delete"
+)
