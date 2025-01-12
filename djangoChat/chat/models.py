@@ -47,3 +47,12 @@ post_delete.connect(
     dispatch_uid="room__on_post_delete"
 )
 
+class RoomMember(models.Model):
+    room = models.ForeignKey("Room", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    # 하나의 User가 하나의 Room에 대해, 다수의 접속이 있을 수 있음
+    # 각 접속에서의 채널명 목록을 집합으로 저장하여, 최초접속 및 최종접속종료를 인지하도록 함
+    # 디폴트로 빈 집합이 생성되도록 
+    channel_names = models.JSONField(default=set)
