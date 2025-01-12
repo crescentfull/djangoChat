@@ -72,3 +72,11 @@ class ChatConsumer(JsonWebsocketConsumer):
             "message": message_dict["message"],
             "sender": message_dict["sender"]
         })
+    
+    
+    # 채팅방이 삭제되면 호출됨
+    # 웹소켓 클라이언트로 메세지를 전달하여 클라이언트에 의해 웹소켓 연결을 끊도록 함
+    def chat_room_deleted(self, message_dict):
+        self.send_json({
+            "type": "chat.room.deleted",
+        })
