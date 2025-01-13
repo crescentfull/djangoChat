@@ -29,7 +29,7 @@ class Room(models.Model):
         return "chat-%s" % (room_pk or room.pk)
     
     class Meta:
-    #쿼리셋 디폴트 정렬옵션 지정을 추천
+    # 쿼리셋 디폴트 정렬옵션 지정을 추천
         ordering = ["-pk"]
         
 def room__on_post_delete(instance, **kwargs):
@@ -76,11 +76,35 @@ class OnlineUserMixin(models.Model):
         blank=True,
         # user.joined_room_set.all() 코드로 user가 참여한 모든 Room 목록을 조회
         related_name="joined_room_set",
-        )
+    )
     
     def get_online_user_set(self) -> QuerySet:
+        """ 현 Room에 접속 중인 User 쿼리셋을 반환 """
         return self.online_user_set.all()
     
     def get_online_usernames(self) -> list[str]:
         qs = self.get_online_users().values_list("username", flat=True)
         return list(qs)
+    
+    def is_joined_user(self, user) -> bool:
+        """ 지정 User가 현 Room의 접속 여부를 반환"""
+        return self.get_online_users().filter(pk=user.pk).exists()
+    
+    def user_join(self, channel_name, user) -> bool:
+        """ 현 Room에 최초 접속여부를 반환 """
+
+        try:
+            room_member = RoomMember.objects.get(room=self, user=user)
+        except RoomMember.DoesNotExist:
+            room_member = RoomMember(room=self, user=user)
+
+        is_new_join = len(room_member.channel_names) == 0
+        room_member.channel_names.add(channel_name)
+        
+        if room_member.pk is None:
+            room_member.save()
+        else:
+            room_member.save(update_fields=["channel_names"])
+        return is_new_join
+    
+    
