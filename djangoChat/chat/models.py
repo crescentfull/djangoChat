@@ -107,4 +107,17 @@ class OnlineUserMixin(models.Model):
             room_member.save(update_fields=["channel_names"])
         return is_new_join
     
-    
+    def user_leave(self, channel_name, user) -> bool:
+        """ 현 Room으로부터 최종 접속종료 여부를 반환한다. """
+        try:
+            room_member = RoomMember.objects.get(room=self, user=user)
+        except RoomMember.DoesNotExist:
+            return True
+        
+        room_member.channel_names.remove(channel_name)
+        if not room_member.channel_names:
+            room_member.delete()
+            return True
+        else:
+            room_member.save(update_fields=["channel_names"])
+            return False
