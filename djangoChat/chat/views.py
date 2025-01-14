@@ -1,5 +1,5 @@
 
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404, resolve_url
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -59,7 +59,21 @@ def room_delete(request: HttpRequest, room_pk: int) -> HttpResponse:
         "room": room,
     })
     
+
+@login_required
+def room_users(request, room_pk):
+    room = get_object_or_404(Room, pk=room_pk)
     
+    #현 채팅방에 새로운 접속여부 체킹
+    if not room.is_joined_user(request.user):
+        return HttpResponse("Unauthorized user", status=401)
+    
+    username_list = room.get_online_usernames()
+    
+    return JsonResponse({
+        "username_list": username_list,
+    })
+
 # room_new 뷰의 클래스 기반 뷰(Class Based View) 구현
 # 좌측 room_new FBV(함수 기반 뷰)와 거의 동일한 동작
 
