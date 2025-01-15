@@ -90,6 +90,13 @@ const handlers = {
     onopen(){
         console.log("웹소켓 서버와 접속");
         this.retry = 0;
+
+        fetch('{% url "chat:room_users" room.pk %}')
+            .then(response => response.json())
+            .then(({ username_list }) => {
+                this.username_set = new Set([...this.username_set, ...username_list]);
+                this.update_user_list();
+            });
     },
     onclose(event){
         if(!event.wasClean){
