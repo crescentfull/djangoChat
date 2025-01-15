@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container my-5">
     <div class="row">
-        <div class="col-sm-12">
+        <div class="col-sm-8">
             <div class="card" style="height: 600px;">
                 <div class="card-header">
                     채팅방: {{ room.name }}
@@ -17,7 +17,14 @@
                     </form>
                 </div>
             </div>
-
+            <div class="col-sm-4">
+                <div class="card" style="height: 600px">
+                    접속유저 <span id="user_count"></span>
+                </div>
+                <div class="card-body">
+                    <ul id="user_list"></ul>
+                </div>
+            </div>
             <hr class="my-3" />
 
             <a href="{% url 'chat:index' %}" class="btn btn-primary"> 대기실로 이동 </a>
@@ -58,6 +65,7 @@ const handlers = {
     chat_messages_tag: null,
     ws: null,
     retry: 0,
+    username_set: new Set(),
 
     //초기화
     init(){
@@ -121,8 +129,7 @@ const handlers = {
             default:
                 console.error('Invalid message type : ${type}');
         }       
-    }
-},
+    },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
     append_message(message) {
         const element = document.createElement("div");
@@ -165,7 +172,16 @@ const handlers = {
             message: message,
         }));
     },
-    
+    //업데이트 user
+    update_user_list(){
+        const html = [...this.username_set]
+            .map(username => '<li>${username}</li>')
+            .join('');
+        document.querySelector("#user_list").innerHTML = html;
+
+        document.querySelector("user_count").textContent = '(${this.username_set.size}명)';
+    },
+
     //modal
     modal(message, ok_handler){
         const modal_ele = document.querySelector("#staticBackdrop");
@@ -182,9 +198,7 @@ const handlers = {
         const modal = new bootstrap.Modal(modal_ele);
         modal.show();
     },
-
-    //예시
-};
+},
 
 handlers.init();
 
