@@ -23,7 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('chat/', include('chat.urls')),
     path("accounts/", include("accounts.urls")),
-    path('', include('app.urls')),
+    # path('', include('app.urls')),
     # / 주소로 접속시에 chat:index 페이지로 이동(URL Reverse)
     path('', RedirectView.as_view(pattern_name="chat:index"), name="root"),
 ]
