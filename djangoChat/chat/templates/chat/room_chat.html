@@ -175,7 +175,7 @@ const handlers = {
         const { message } = props;
         console.log("웹소켓으로 전송할 메세지", message);
     
-        //this.append_message(message); //메세지창에 추가
+        this.append_message(message); //메세지창에 추가
 
         // 유저가 입력한 채팅 메세지를 채널스로 전달
         this.ws.send(JSON.stringify({
