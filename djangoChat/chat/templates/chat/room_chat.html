@@ -17,14 +17,17 @@
                     </form>
                 </div>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div class="card" style="height: 600px">
                     접속유저 <span id="user_count"></span>
                 </div>
                 <div class="card-body">
-                    <ul id="user_list"></ul>
+                    <ul id="user_list">
+                    
+                    </ul>
                 </div>
             </div>
+            
             <hr class="my-3" />
 
             <a href="{% url 'chat:index' %}" class="btn btn-primary"> 대기실로 이동 </a>
@@ -142,7 +145,7 @@ const handlers = {
         }       
     },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
-    append_message(message) {
+    append_message(messag, sender) {
         const element = document.createElement("div");
         element.className = "chat-message";
 
