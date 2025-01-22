@@ -136,15 +136,15 @@ const handlers = {
                 break;
             case "chat.user.leave":
                 this.append_message('${username}님이 나가셨습니다.');
-                this.username_set.add(username);
+                this.username_set.delete(username);
                 this.update_user_list();
                 break;
             default:
-                console.error('Invalid message type : ${type}');
+                console.error('Invalid message type : ' + type);
         }       
     },
     // 채팅 메세지 로그 창 끝에 새로운 메세지 추가
-    append_message(messag, sender) {
+    append_message(message, sender) {
         const element = document.createElement("div");
         element.className = "chat-message";
 
@@ -154,7 +154,7 @@ const handlers = {
             element.className += " me";
         }
         else if (sender){
-            footer = ' from ${sender}';
+            footer = ' from ' + sender;
         }
         
         // CSS 스타일링을 위해 div로 한 번 더 감싸기
@@ -171,15 +171,18 @@ const handlers = {
         event.preventDefault();
 
         const form_data = new FormData(event.target);
+        console.log(form_data);
         const props = Object.fromEntries(form_data);
+        console.log(props);
         event.target.reset();
 
         const { message } = props;
         console.log("웹소켓으로 전송할 메세지", message);
     
-        this.append_message(message); //메세지창에 추가
+        this.append_message(message, "{{ user.username }}"); //메세지창에 추가
 
         // 유저가 입력한 채팅 메세지를 채널스로 전달
+        console.log(this.append_message());
         this.ws.send(JSON.stringify({
             type: "chat.message",
             message: message,
