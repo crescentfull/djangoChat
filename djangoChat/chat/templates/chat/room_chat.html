@@ -114,7 +114,7 @@ const handlers = {
                 alert("웹소켓 서버 접속 오류, 대기실로 이동");
                 window.location.href = "{% url 'chat:index' %}";
                 }
-             }
+        }
     },
     onerror(){
         console.error("웹소켓 에러가 발생");
