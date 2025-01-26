@@ -59,7 +59,7 @@
     </div>
   </div>
 
-{% endblock  %}
+{% endblock %}
 
 {% block extra-script %}
 <script>
@@ -165,19 +165,17 @@ const handlers = {
 
         this.chat_messages_tag.appendChild(element);
         this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
+
     },
     // 채팅 메세지 입력폼에 대한 submit 이벤트 핸들러
     onsubmit(event){
         event.preventDefault();
 
         const form_data = new FormData(event.target);
-        console.log(form_data);
         const props = Object.fromEntries(form_data);
-        console.log(props);
         event.target.reset();
 
         const { message } = props;
-        console.log("웹소켓으로 전송할 메세지", message);
     
         this.append_message(message, "{{ user.username }}"); //메세지창에 추가
 
@@ -223,7 +221,7 @@ const ws_url = protocol + "//" + location.host + "/ws" + location.pathname;
 handlers.connect(ws_url);
 
 </script>
-{% endblock  %}
+{% endblock %}
 
 {% block extra-style %}
 <style>
