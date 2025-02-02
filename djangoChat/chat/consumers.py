@@ -1,15 +1,15 @@
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
+
 from chat.models import Room
-from django.contrib.auth.models import AnonymousUser
 class ChatConsumer(JsonWebsocketConsumer):
     # room_name에 상관없이 모든 유저들을 광장(sqaure)을 통해 채팅
     #SQUARE_GROUP_NAME = "square"
     #groups = [SQUARE_GROUP_NAME] 
     # 고정 그룹명 x , room_name에 기반하여 그룹명 생성
     
-    def _init_(self):
-        super().__init__()
+    def _init_(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # 파이썬 클래스에서 인스턴스 변수는 생성자 내에서 정의
         self.group_name = "" # 인스턴스 변수 group_name 추가
         self.room = None
@@ -28,6 +28,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             self.close()
         else:
             room_pk = self.scope["url_route"]["kwargs"]["room_pk"]
+            
             try:
                 self.room = Room.objects.get(pk=room_pk)
             except Room.DoesNotExist:
@@ -44,13 +45,20 @@ class ChatConsumer(JsonWebsocketConsumer):
                             "username":user.username,
                         }
                     )
+                
+                async_to_sync(self.channel_layer.group_add)(
+                    self.group_name,
+                    self.channel_name,
+                )
+                
                 self.accept()
                     
     # 웹 소켓 클라이언트와 접속이 끊어졌을 때, 호출됨
     def disconnect(self, code):
         if self.group_name:
             async_to_sync(self.channel_layer.group_discard)(
-                self.group_name, self.channel_name
+                self.group_name,
+                self.channel_name,
             )
 
         user = self.scope["user"]
@@ -59,9 +67,10 @@ class ChatConsumer(JsonWebsocketConsumer):
             is_last_leave = self.room.user_leave(self.channel_name, user)
             if is_last_leave:
                 async_to_sync(self.channel_layer.group_send)(
+                    self.group_name,
                     {
-                    "type":"chat.user.leave",
-                    "username":user.username,
+                        "type":"chat.user.leave",
+                        "username":user.username,
                     }
                 )
         
@@ -81,7 +90,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                         "type": "chat.message",
                         "message": message,
                         "sender": sender,
-                    },
+                    }
                 )
         else:
             print(f"Invalid message type : {_type}")
@@ -94,15 +103,14 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.send_json({
             "type": "chat.message",
             "message": message_dict["message"],
-            "sender": message_dict["sender"]
+            "sender": message_dict["sender"],
         })
     
     # 채팅방이 삭제되면 호출됨
     # 웹소켓 클라이언트로 메세지를 전달하여 클라이언트에 의해 웹소켓 연결을 끊도록 함
     def chat_room_deleted(self, message_dict):
-        self.send_json({
-            "type": "chat.room.deleted",
-        })
+        custom_code = 4000
+        self.close(code=custom_code)
         
     def chat_user_join(self, message_dict):
         self.send_json({
