@@ -183,3 +183,5 @@ if SENTRY_DSN:
         # django.contrib.auth) you may enable sending PII data.
         send_default_pii=SENTRY_SEND_DEFAULT_PII,
     )
+    
+AUTH_USER_MODEL = 'accounts.CustomUser'
