@@ -5,6 +5,8 @@ from django.db.models.signals import post_save, post_delete
 from app.mixins import ChannelLayerGroupSendMixin
 
 class Post(ChannelLayerGroupSendMixin, models.Model):
+    CHANNEL_LAYER_GROUP_NAME = "liveblog"
+    
     title = models.CharField(max_length=100)
     content = models.TextField()
     
@@ -37,7 +39,7 @@ def post__on_post_delete(instance: Post, **kwargs):
     
     instance.channel_layer_group_send({
         "type": "liveblog.post.deleted",
-        "post_id": post_id
+        "post_id": post_id,
     })
     
 post_delete.connect(
