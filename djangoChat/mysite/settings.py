@@ -106,7 +106,7 @@ if channel_layer_redis_url:
                 "hosts": [
                     {
                         "host": redis_url.hostname,
-                        "port": redis_url.port or 6379,
+                        "port": redis_url.port,
                         "password": redis_url.password,
                     }
                 ]
