@@ -1,5 +1,5 @@
 
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404, resolve_url
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -9,7 +9,7 @@ from django.views.generic import CreateView
 from chat.forms import RoomForm
 from chat.models import Room
 
-def index(request: HttpRequest) -> HttpResponse:
+def index(request):
     #.order_by("-pk")를 지정하지 않으면,
     # room 모델의 디폴트 정렬 옵션이 지정된다.
     room_qs = Room.objects.all()
@@ -35,14 +35,14 @@ def room_new(request):
     }) 
 
 @login_required        
-def room_chat(request: HttpRequest, room_pk: str) -> HttpResponse:
+def room_chat(request, room_pk):
     room = get_object_or_404(Room, pk=room_pk)
     return render(request, "chat/room_chat.html", {
         "room": room,
     })
 
 @login_required
-def room_delete(request: HttpRequest, room_pk: int) -> HttpResponse:
+def room_delete(request, room_pk):
     room = get_object_or_404(Room, pk=room_pk)
     
     #권한체크, 백엔드 단에서 권한체크는 필수.

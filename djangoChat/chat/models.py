@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models.signals import post_delete
+from django.contrib.auth.models import User
 
 from mysite import settings
 from channels.layers import get_channel_layer
@@ -67,15 +68,12 @@ class OnlineUserMixin(models.Model):
         
 class Room(OnlineUserMixin,models.Model):
     # 채팅방 생성 유저를 저장할 수 있도록 외래키를 추가
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="owned_room_set",
-    )
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     # 한글 채팅방 이름 필드로서 사용하려함
     # name 필드에서는 유일성 체크를 하지 않으므로
     # 같은 이름의 채팅방도 만들 수 있다.
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
         
     class Meta:
         # 쿼리셋 디폴트 정렬옵션 지정을 추천
