@@ -1,8 +1,7 @@
-"""
-URL configuration for mysite project.
+"""mysite URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
+    https://docs.djangoproject.com/en/4.1/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -14,16 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
     path('chat/', include('chat.urls')),
-    path("accounts/", include("accounts.urls")),
-    # path('', include('app.urls')),
-    # / 주소로 접속시에 chat:index 페이지로 이동(URL Reverse)
+    path('', include('app.urls')),
     path('', RedirectView.as_view(pattern_name="chat:index"), name="root"),
 ]

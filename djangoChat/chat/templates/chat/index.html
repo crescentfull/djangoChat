@@ -4,11 +4,15 @@
     <h1>채팅방 목록</h1>
     <ul>
         {% for room in room_list %}
-        <li>
-            <a href="{% url 'chat:room_chat' room.pk %}"> {{ room.name }} </a>
-        </li>
+            <li>
+                <a href="{% url 'chat:room_chat' room.pk %}">
+                    {{ room.name }}
+                </a>
+            </li>
         {% endfor %}
     </ul>
-    
-    <a href="{% url 'chat:room_new' %}"> 새 채팅방 만들기 </a>
+
+    <a href="{% url 'chat:room_new' %}">
+        새 채팅방 만들기
+    </a>
 {% endblock %}

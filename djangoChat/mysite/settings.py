@@ -13,32 +13,25 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 from urllib.parse import urlparse
-
-from environs import Env
+from dotenv import load_dotenv
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-env = Env()
-
-env_path = Path(env.str("ENV_PATH", default=str(BASE_DIR / ".env")))
-
-if env_path.exists():
-    env.read_env(env_path, override=True)
-
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0@k+rs*!!j$ga%*%*b=lgavw0i_k9rqi!rh#ryzo176^s74xvi'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", default=True)
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -98,12 +91,12 @@ ASGI_APPLICATION = 'mysite.asgi.application'
 
 default_database_url = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
 DATABASES = {
-    "default": env.dj_db_url("DATABASE_URL", default=default_database_url),
+    "default": dj_database_url.parse(os.getenv('DATABASE_URL', default_database_url)),
 }
 
 
 # django channels layer
-channel_layer_redis_url = env.str("CHANNEL_LAYER_REDIS_URL", default=None)
+channel_layer_redis_url = os.getenv('CHANNEL_LAYER_REDIS_URL', None)
 if channel_layer_redis_url:
     redis_url = urlparse(channel_layer_redis_url)
     CHANNEL_LAYERS = {
@@ -164,9 +157,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-SENTRY_DSN = env.str("SENTRY_DSN", default="")
-SENTRY_TRACES_SAMPLE_RATE = env.float("SENTRY_TRACES_SAMPLE_RATE", default=1.0)
-SENTRY_SEND_DEFAULT_PII = env.bool("SENTRY_SEND_DEFAULT_PII", default=False)
+SENTRY_DSN = os.getenv('SENTRY_DSN', '')
+SENTRY_TRACES_SAMPLE_RATE = float(os.getenv('SENTRY_TRACES_SAMPLE_RATE', 1.0))
+SENTRY_SEND_DEFAULT_PII = os.getenv('SENTRY_SEND_DEFAULT_PII', 'False') == 'True'
 
 if SENTRY_DSN:
     import sentry_sdk

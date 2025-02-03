@@ -31,7 +31,7 @@ application = ProtocolTypeRouter({
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
         URLRouter(
-            chat.routing.websocket_urlpatters + 
+            chat.routing.websocket_urlpatterns + 
             app.routing.websocket_urlpatterns
             )
         )
