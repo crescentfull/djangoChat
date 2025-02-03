@@ -77,12 +77,12 @@ def room_users(request, room_pk):
 # room_new 뷰의 클래스 기반 뷰(Class Based View) 구현
 # 좌측 room_new FBV(함수 기반 뷰)와 거의 동일한 동작
 
-class RoomCreateView(LoginRequiredMixin, CreateView):
-    form_class = RoomForm
-    template_name = "chat/room_form.html"
+# class RoomCreateView(LoginRequiredMixin, CreateView):
+#     form_class = RoomForm
+#     template_name = "chat/room_form.html"
     
-    def get_success_url(self):
-        created_room = self.object
-        return resolve_url("chat:room_chat", created_room.pk)
+#     def get_success_url(self):
+#         created_room = self.object
+#         return resolve_url("chat:room_chat", created_room.pk)
     
-room_new = RoomCreateView.as_view()
+# room_new = RoomCreateView.as_view()
