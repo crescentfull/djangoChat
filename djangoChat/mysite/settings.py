@@ -96,9 +96,19 @@ DATABASES = {
 
 
 # django channels layer
-channel_layer_redis_url = os.getenv('CHANNEL_LAYER_REDIS_URL', None)
+channel_layer_redis_url = os.getenv("CHANNEL_LAYER_REDIS_URL", None)
+
 if channel_layer_redis_url:
     redis_url = urlparse(channel_layer_redis_url)
+
+    # 포트가 없을 경우 기본 포트 설정
+    redis_port = redis_url.port or 6379  # 기본 Redis 포트
+
+    # 비밀번호 추출
+    redis_password = redis_url.netloc.split("@", 1)[0]
+
+    print(f"Redis 연결 설정: host={redis_url.hostname}, port={redis_port}, password={'CHECK' if redis_password else None}")
+
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -106,13 +116,22 @@ if channel_layer_redis_url:
                 "hosts": [
                     {
                         "host": redis_url.hostname,
-                        "port": redis_url.port,
-                        "password": redis_url.password,
+                        "port": redis_port,
+                        "password": redis_password,  # 수정된 비밀번호 추출 방식 적용
                     }
                 ]
             }
         }
     }
+else:
+    # 환경 변수가 없을 경우 기본 설정 (InMemoryChannelLayer 사용)
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }
+    print("CHANNEL_LAYER_REDIS_URL이 설정되지 않음. InMemoryChannelLayer 사용.")
+
 
 
 # Password validation

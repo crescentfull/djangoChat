@@ -30,7 +30,11 @@
                 <a href="{% url 'accounts:signup' %}" class="btn btn-primary">회원가입</a>
             {% else %}
                 <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary me-2">프로필</a>
-                <a href="{% url 'accounts:logout' %}" class="btn btn-primary">로그아웃</a>
+                {% comment %} <a href="{% url 'accounts:logout' %}" class="btn btn-primary">로그아웃</a> {% endcomment %}
+                <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">로그아웃</button>
+                </form>
             {% endif %}
         </div>
     </header>
