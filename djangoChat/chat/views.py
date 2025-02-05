@@ -8,9 +8,18 @@ from chat.models import Room
 
 
 def index(request):
-    room_qs = Room.objects.all()
+    rooms = Room.objects.all()
+    room_data = []
+    
+    for room in rooms:
+        user_count = room.get_online_users().count()
+        room_data.append({
+            'room': room,
+            'user_count': user_count,
+        })
+        
     return render(request, "chat/index.html", {
-        "room_list": room_qs,
+        "room_data": room_data,
     })
 
 

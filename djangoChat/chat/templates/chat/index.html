@@ -3,11 +3,12 @@
 {% block content %}
     <h1>채팅방 목록</h1>
     <ul>
-        {% for room in room_list %}
+        {% for data in room_data %}
             <li>
-                <a href="{% url 'chat:room_chat' room.pk %}">
-                    {{ room.name }}
+                <a href="{% url 'chat:room_chat' data.room.pk %}">
+                    {{ data.room.name }}
                 </a>
+                <span>({{ data.user_count }}명)</span>
             </li>
         {% endfor %}
     </ul>
