@@ -181,11 +181,11 @@ const handlers = {
             element.className += " me";
         }
         else if (sender) {
-            footer = ` from ${sender}`;
+            footer = ` ${sender} : `;
         }
 
         const wrapper = document.createElement("div");
-        wrapper.textContent = message + footer;
+        wrapper.textContent = footer + message;
         element.appendChild(wrapper);
 
         this.chat_messages_tag.appendChild(element);
