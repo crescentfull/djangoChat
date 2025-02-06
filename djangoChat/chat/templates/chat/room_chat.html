@@ -172,6 +172,10 @@ const handlers = {
                 console.error(`Invalid message type : ${type}`);
         }
     },
+    getCurrentTime() {
+        const now = new Date();
+        return `${now.getHours()}:${now.getMinutes()}`;
+    },
     append_message(message, sender) {
         const element = document.createElement("div");
         element.className = "chat-message";
