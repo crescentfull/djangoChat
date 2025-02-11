@@ -17,7 +17,7 @@
 ### 설치 단계
 1. 저장소를 클론합니다.
    ```bash
-   git clone https://github.com/사용자명/프로젝트명.git
+   git clone https://github.com/crescentfull/djangoChat.git
    cd 프로젝트명
    ```
 
