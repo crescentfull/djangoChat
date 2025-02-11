@@ -4,14 +4,14 @@
 이 프로젝트는 [실시간 웹채팅 시스템을 구현하는 것을 통해 네트워크 프로그래밍의 기본 개념과 WebSoket, 비동기 프로그래밍 숙달]을 목표로 합니다.
 
 ## 기능
-- 기능 1: [기능 설명]
-- 기능 2: [기능 설명]
-- 기능 3: [기능 설명]
+- 기능 1: 채티방 목록 조회, 생성, 삭제
+- 기능 2: 회원가입, 본인 프로필 조회
+- 기능 3: 실시간 채팅
 
 ## 설치 방법
 
 ### 필수 조건
-- Python 3.10
+- Python 3.10.X
 - 가상환경 설정을 위한 `venv` 또는 `virtualenv`
 
 ### 설치 단계
@@ -36,6 +36,23 @@
    ```bash
    python manage.py migrate
    ```
+
+5. sample.env 파일의 환경변수를 설정하고 .env로 파일명을 변경하여줍니다.
+    유저 간 채팅을 위해 redis 서버 설치가 필요합니다.
+    [Redis 공식 홈페이지](https://redis.io/)
+
+    ```bash
+    #django secret_KEY
+    SECRET_KEY=""
+
+    #redis
+    # 하나의 환경변수로 HOST/PORT/PASSWORD 
+    CHANNEL_LAYER_REDIS_URL="redis://[PASSWORD]@[HOST]:[PORT]"
+
+
+    # 허용할 호스트
+    ALLOWED_HOSTS="*"
+    ```
 
 5. 개발 서버를 시작합니다.
    ```bash
@@ -74,4 +91,4 @@
 5. 풀 리퀘스트를 생성합니다.
 
 ## 라이선스
-이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 `LICENSE` 파일을 참조하세요. 
+이 프로젝트는 인프런의 [파이썬/장고로 웹채팅 서비스 만들기 (Feat. Channels)] 강의를 참고하여 만들었습니다.
