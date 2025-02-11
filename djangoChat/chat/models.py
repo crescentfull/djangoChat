@@ -7,9 +7,10 @@ from django.db.models.signals import post_delete
 from mysite.json_extended import ExtendedJSONEncoder, ExtendedJSONDecoder
 
 
+# 온라인 사용자 관리를 위한 믹스인 클래스
 class OnlineUserMixin(models.Model):
     class Meta:
-        abstract = True
+        abstract = True # 추상 모델로 정의
 
     online_user_set = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -18,13 +19,16 @@ class OnlineUserMixin(models.Model):
         related_name="joined_room_set",
     )
 
+    # 현재 온라인 사용자 목록을 반환하는 메서드
     def get_online_users(self):
         return self.online_user_set.all()
 
+    # 온라인 사용자의 사용자 이름 목록을 반환하는 메서드
     def get_online_usernames(self):
         qs = self.get_online_users().values_list("username", flat=True)
         return list(qs)
 
+    # 사용자가 방에 참여했는지 확인하는 메서드
     def is_joined_user(self, user):
         return self.get_online_users().filter(pk=user.pk).exists()
 
@@ -34,6 +38,7 @@ class OnlineUserMixin(models.Model):
         except RoomMember.DoesNotExist:
             room_member = RoomMember(room=self, user=user)
 
+        # 새로운 사용자가 참여한 경우
         is_new_join = len(room_member.channel_names) == 0
         room_member.channel_names.add(channel_name)
 
@@ -68,7 +73,7 @@ class Room(OnlineUserMixin, models.Model):
     name = models.CharField(max_length=100)
 
     class Meta:
-        ordering = ["-pk"]
+        ordering = ["-pk"] # 방 목록을 내림차순으로 정렬
 
     @property
     def chat_group_name(self):
@@ -88,7 +93,7 @@ def room__on_post_delete(instance: Room, **kwargs):
         }
     )
 
-
+# post_delete 시그널을 연결하여 Room 모델이 삭제될 때 호출되도록 함
 post_delete.connect(
     room__on_post_delete,
     sender=Room,
