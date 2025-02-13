@@ -69,6 +69,9 @@ class ChatConsumer(JsonWebsocketConsumer):
                         "username": user.username,
                     }
                 )
+                # 채팅방에 남은 유저 수 확인, 0명이면 채팅방 삭제
+                if self.room.get_online_users().count() == 0:
+                    self.room.delete()
 
     # 클라이언트로부터 JSON 메시지를 받을 때 호출
     def receive_json(self, content, **kwargs):
