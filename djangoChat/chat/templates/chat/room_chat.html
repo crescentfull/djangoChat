@@ -174,7 +174,9 @@ const handlers = {
     },
     getCurrentTime() {
         const now = new Date();
-        return `${now.getHours()}:${now.getMinutes()}`;
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `(${hours}:${minutes})`;
     },
     append_message(message, sender) {
         const element = document.createElement("div");
@@ -187,14 +189,14 @@ const handlers = {
         else if (sender) {
             footer = ` ${sender} : `;
         }
-
+        
         const wrapper = document.createElement("div");
-        wrapper.textContent = footer + message;
+        const time = this.getCurrentTime();
+        wrapper.textContent = footer + message + " " + time;
         element.appendChild(wrapper);
 
         this.chat_messages_tag.appendChild(element);
         this.chat_messages_tag.scrollTop = this.chat_messages_tag.scrollHeight;
-
     },
     onsubmit(event) {
         event.preventDefault();
