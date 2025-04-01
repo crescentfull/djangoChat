@@ -37,7 +37,8 @@ class ChatConsumer(JsonWebsocketConsumer):
                     for message in room_messages[self.room.pk]:
                         self.send_json({
                             "type": "chat.message",
-                            
+                            "message": message['content'],
+                            "sender": message['sender'],
                         })
                     
                     # 새 사용자가 참여했음을 그룹에 알림
