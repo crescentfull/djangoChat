@@ -2,7 +2,11 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
 from chat.models import Room
+from collections import defaultdict, deque
 
+
+# 메모리에 메시지를 저장(dict)
+room_messages = defaultdict(lambda: deque(maxlen=5))
 # JsonWebsocketConsumer를 상속받아 채팅 기능을 구현하는 클래스
 class ChatConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -29,6 +33,13 @@ class ChatConsumer(JsonWebsocketConsumer):
                 # 사용자가 방에 새로 참여했는지 확인
                 is_new_join = self.room.user_join(self.channel_name, user)
                 if is_new_join:
+                    # 메모리에 저장된 최근 메시지 전송
+                    for message in room_messages[self.room.pk]:
+                        self.send_json({
+                            "type": "chat.message",
+                            
+                        })
+                    
                     # 새 사용자가 참여했음을 그룹에 알림
                     async_to_sync(self.channel_layer.group_send)(
                         self.group_name,
