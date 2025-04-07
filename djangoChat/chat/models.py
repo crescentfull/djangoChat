@@ -3,8 +3,12 @@ from channels.layers import get_channel_layer
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
+from django.contrib.auth.models import User
+import logging
 
 from mysite.json_extended import ExtendedJSONEncoder, ExtendedJSONDecoder
+
+logger = logging.getLogger('chat')
 
 
 # 온라인 사용자 관리를 위한 믹스인 클래스
@@ -33,6 +37,7 @@ class OnlineUserMixin(models.Model):
         return self.get_online_users().filter(pk=user.pk).exists()
 
     def user_join(self, channel_name, user):
+        logger.debug(f"사용자 {user.username}가 채팅방 {self.name}에 참여 시도")
         try:
             room_member = RoomMember.objects.get(room=self, user=user)
         except RoomMember.DoesNotExist:
@@ -47,9 +52,11 @@ class OnlineUserMixin(models.Model):
         else:
             room_member.save(update_fields=["channel_names"])
 
+        logger.info(f"사용자 {user.username}가 채팅방 {self.name}에 참여")
         return is_new_join
 
     def user_leave(self, channel_name, user):
+        logger.debug(f"사용자 {user.username}가 채팅방 {self.name}에서 퇴장 시도")
         try:
             room_member = RoomMember.objects.get(room=self, user=user)
         except RoomMember.DoesNotExist:
@@ -58,9 +65,11 @@ class OnlineUserMixin(models.Model):
         room_member.channel_names.remove(channel_name)
         if not room_member.channel_names:
             room_member.delete()
+            logger.info(f"사용자 {user.username}가 채팅방 {self.name}에서 퇴장")
             return True
         else:
             room_member.save(update_fields=["channel_names"])
+            logger.debug(f"사용자 {user.username}가 채팅방 {self.name}에 없음")
             return False
 
 
@@ -71,6 +80,11 @@ class Room(OnlineUserMixin, models.Model):
         related_name="owned_room_set",
     )
     name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    users = models.ManyToManyField(User, related_name='chat_rooms')
+    online_users = models.ManyToManyField(User, related_name='online_rooms', blank=True)
+    channel_names = models.JSONField(default=dict)
 
     class Meta:
         ordering = ["-pk"] # 방 목록을 내림차순으로 정렬
@@ -82,6 +96,9 @@ class Room(OnlineUserMixin, models.Model):
     @staticmethod
     def make_chat_group_name(room=None, room_pk=None):
         return "chat-%s" % (room_pk or room.pk)
+
+    def __str__(self):
+        return self.name
 
 
 def room__on_post_delete(instance: Room, **kwargs):
